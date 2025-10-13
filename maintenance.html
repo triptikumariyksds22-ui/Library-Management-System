@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Library Book Maintenance</title>
+<style>
+body {font-family: Arial, sans-serif; background:#f4f6f8; margin:0; text-align:center;}
+header {background:#007bff;color:white;padding:20px 0;font-size:24px;}
+nav {background:#e9ecef;padding:15px;}
+nav a {margin:10px; text-decoration:none;color:#007bff;font-weight:bold;}
+nav a:hover {text-decoration:underline;}
+.content {margin-top:30px; padding:0 20px; text-align:left; max-width:900px; margin:auto;}
+table {width:100%; border-collapse:collapse; margin-top:10px;}
+th, td {border:1px solid #dee2e6; padding:8px; text-align:left;}
+th {background:#007bff; color:white;}
+button {padding:4px 8px; border:none; border-radius:4px; cursor:pointer;}
+.add-btn {background:#28a745; color:white;}
+.delete-btn {background:#dc2626; color:white;}
+.update-btn {background:#ffc107; color:white;}
+.issue-btn {background:#17a2b8; color:white;}
+</style>
+</head>
+<body>
+
+<header>Library Book Maintenance</header>
+<nav>
+  <a href="admin dashboard.html">Admin Dashboard</a>
+  <a href="#" onclick="logout()">Logout</a>
+</nav>
+
+<div class="content">
+<h2>Book Inventory</h2>
+<button class="add-btn" onclick="addBook()">Add Book</button>
+<table id="booksTable">
+  <thead>
+    <tr>
+      <th>Book ID</th>
+      <th>Title</th>
+      <th>Author</th>
+      <th>Quantity</th>
+      <th>Status</th>
+      <th>Active Issue</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+</div>
+
+<script>
+// Admin-only
+let role = localStorage.getItem("role");
+if(role!=='admin'){ alert("Access Denied!"); window.location.href="login.html"; }
+
+// Load books
+let books = JSON.parse(localStorage.getItem("books")) || [];
+
+// Save books
+function saveBooks(){
+  localStorage.setItem("books", JSON.stringify(books));
+}
+
+// Render table
+function renderBooks(){
+  let tbody = document.querySelector("#booksTable tbody");
+  tbody.innerHTML = "";
+  books.forEach((b,i)=>{
+    let status = b.quantity>0 ? "Available" : "Not Available";
+    let activeIssue = b.issued ? "Yes" : "No";
+    let row = document.createElement("tr");
+    row.innerHTML = `<td>${b.id}</td>
+                     <td>${b.title}</td>
+                     <td>${b.author}</td>
+                     <td>${b.quantity}</td>
+                     <td>${status}</td>
+                     <td>${activeIssue}</td>
+                     <td>
+                       <button class="update-btn" onclick="updateBook(${i})">Update Qty</button>
+                       <button class="issue-btn" onclick="toggleIssue(${i})">${b.issued ? 'Return' : 'Issue'}</button>
+                       <button class="delete-btn" onclick="deleteBook(${i})">Delete</button>
+                     </td>`;
+    tbody.appendChild(row);
+  });
+}
+
+// Add book
+function addBook(){
+  let id = prompt("Enter Book ID:");
+  let title = prompt("Enter Book Title:");
+  let author = prompt("Enter Author Name:");
+  let qty = prompt("Enter Quantity:");
+  if(!id || !title || !author || !qty) return;
+  books.push({id, title, author, quantity: parseInt(qty), issued:false});
+  saveBooks();
+  renderBooks();
+}
+
+// Update book quantity
+function updateBook(i){
+  let b = books[i];
+  let qty = prompt("Update Quantity:", b.quantity);
+  if(qty!==null) {
+    b.quantity = parseInt(qty);
+    saveBooks();
+    renderBooks();
+  }
+}
+
+// Toggle issue status
+function toggleIssue(i){
+  let b = books[i];
+  if(b.quantity <= 0 && !b.issued){
+    alert("No copies available to issue!");
+    return;
+  }
+  b.issued = !b.issued;
+  if(b.issued) b.quantity--; // decrease available
+  else b.quantity++; // increase on return
+  saveBooks();
+  renderBooks();
+}
+
+// Delete book
+function deleteBook(i){
+  if(confirm("Are you sure you want to delete this book?")){
+    books.splice(i,1);
+    saveBooks();
+    renderBooks();
+  }
+}
+
+// Initial render
+renderBooks();
+
+// Logout
+function logout(){ alert("Thank you!"); localStorage.removeItem("role"); window.location.href="login.html"; }
+</script>
+
+</body>
+</html>

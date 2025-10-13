@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Library Transactions</title>
+<style>
+body { font-family: Arial, sans-serif; background:#f4f6f8; margin:0; padding:0; text-align:center;}
+header { background:#007bff; color:white; padding:20px 0; font-size:24px;}
+nav { background:#e9ecef; padding:15px; }
+nav a { margin:10px; text-decoration:none; color:#007bff; font-weight:bold;}
+nav a:hover { text-decoration:underline;}
+.content { margin:30px auto; max-width:1000px; text-align:left; }
+table { width:100%; border-collapse:collapse; margin-top:10px; }
+th, td { border:1px solid #dee2e6; padding:8px; text-align:center; }
+th { background:#007bff; color:white; }
+button { padding:4px 8px; border:none; border-radius:4px; cursor:pointer; margin:2px;}
+input[type="text"], input[type="number"] { width:90px; padding:4px; }
+.checkbox { width:20px; height:20px; }
+.radio { width:16px; height:16px; }
+.chart-link { margin-bottom:10px; display:block; }
+</style>
+</head>
+<body>
+
+<header>Library Transactions</header>
+<nav>
+  <a href="admin dashboard.html">Dashboard</a>
+  <a href="transactions.html">Transactions</a>
+  
+  <a href="#" onclick="logout()">Logout</a>
+</nav>
+
+<div class="content">
+  <h2>Book Transactions</h2>
+  <button onclick="addTransaction()">Add Transaction</button>
+
+  <table id="transTable">
+    <thead>
+      <tr>
+        <th>Member</th>
+        <th>Book ID</th>
+        <th>Title</th>
+        <th>Available</th>
+        <th>Issued</th>
+        <th>Booked</th>
+        <th>Returned</th>
+        <th>Late Fine (₹)</th>
+        <th>Damage?</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<script>
+// Access control
+let role = localStorage.getItem("role");
+if(!role){ alert("Access Denied! Login first."); window.location.href="login.html"; }
+
+// Mock transaction data
+let transactions = JSON.parse(localStorage.getItem("transactions")) || [
+  { member:"Alice", bookId:"BK101", title:"C Programming", available:true, status:"issued", lateFine:0, damage:false },
+  { member:"Bob", bookId:"BK102", title:"Python Basics", available:false, status:"booked", lateFine:20, damage:true }
+];
+
+function logout(){ alert("Thank you!"); localStorage.removeItem("role"); window.location.href="login.html"; }
+
+function saveTransactions(){ localStorage.setItem("transactions", JSON.stringify(transactions)); }
+
+function renderTable(){
+  const tbody = document.querySelector("#transTable tbody");
+  tbody.innerHTML="";
+  transactions.forEach((t,i)=>{
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${t.member}</td>
+      <td>${t.bookId}</td>
+      <td>${t.title}</td>
+      <td><input type="checkbox" class="checkbox" ${t.available ? "checked" : ""} ${role==="student"?"disabled":""} onclick="toggleAvailable(${i}, this)"></td>
+      <td><input type="radio" name="status${i}" class="radio" ${t.status==="issued"?"checked":""} onclick="setStatus(${i},'issued')"></td>
+      <td><input type="radio" name="status${i}" class="radio" ${t.status==="booked"?"checked":""} onclick="setStatus(${i},'booked')"></td>
+      <td><input type="radio" name="status${i}" class="radio" ${t.status==="returned"?"checked":""} onclick="setStatus(${i},'returned')"></td>
+      <td><input type="number" value="${t.lateFine}" ${role==="student"?"readonly":""} onchange="updateFine(${i}, this)"></td>
+      <td><input type="checkbox" class="checkbox" ${t.damage?"checked":""} onchange="toggleDamage(${i}, this)"></td>
+      <td><button onclick="deleteTransaction(${i})">Delete</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// Add new transaction
+function addTransaction(){
+  const member = prompt("Member Name:");
+  const bookId = prompt("Book ID:");
+  const title = prompt("Book Title:");
+  if(!member || !bookId || !title) return;
+  transactions.push({ member, bookId, title, available:true, status:"issued", lateFine:0, damage:false });
+  saveTransactions();
+  renderTable();
+}
+
+// Delete transaction
+function deleteTransaction(i){
+  if(confirm("Delete this transaction?")){
+    transactions.splice(i,1);
+    saveTransactions();
+    renderTable();
+  }
+}
+
+// Toggle availability
+function toggleAvailable(i, el){
+  transactions[i].available = el.checked;
+  saveTransactions();
+}
+
+// Set radio status
+function setStatus(i, status){
+  transactions[i].status = status;
+  saveTransactions();
+  renderTable();
+}
+
+// Update fine
+function updateFine(i, el){
+  transactions[i].lateFine = parseInt(el.value) || 0;
+  saveTransactions();
+}
+
+// Toggle damage checkbox
+function toggleDamage(i, el){
+  transactions[i].damage = el.checked;
+  saveTransactions();
+}
+
+// Initial render
+renderTable();
+</script>
+
+</body>
+</html>

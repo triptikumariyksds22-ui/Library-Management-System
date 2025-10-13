@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Library Membership - Entry Form</title>
+<style>
+  :root{
+    --bg:#f0f2f5;
+    --card:#ffffff;
+    --accent:#2f855a;
+    --muted:#6b7280;
+    --radius:10px;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+    background:var(--bg);
+    display:flex;
+    align-items:flex-start;
+    justify-content:center;
+    padding:36px 16px;
+  }
+
+  .wrap{width:100%;max-width:1150px;margin:0 auto;position:relative;}
+
+  .logout-btn {
+    position: fixed;
+    top: 20px;
+    right: 30px;
+    background:#dc2626;
+    color:white;
+    border:none;
+    padding:10px 18px;
+    border-radius:8px;
+    cursor:pointer;
+    font-weight:600;
+    font-size:15px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    transition:0.2s;
+    z-index:1000;
+  }
+  .logout-btn:hover{background:#b91c1c;}
+
+  .card{
+    background:var(--card);
+    border-radius:var(--radius);
+    box-shadow:0 8px 30px rgba(2,6,23,0.08);
+    padding:22px;
+    margin-bottom:18px;
+  }
+
+  h1{font-size:20px;margin:0 0 12px;color:#0f172a;}
+  p.lead{margin:0 0 18px;color:var(--muted);font-size:14px;}
+
+  form.grid{
+    display:grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap:12px 16px;
+    align-items:end;
+  }
+
+  label{display:block;font-size:13px;color:#111827;margin-bottom:6px;}
+
+  input[type="text"],input[type="tel"],input[type="email"],input[type="date"],select,textarea{
+    width:100%;padding:10px 12px;border-radius:8px;border:1px solid #e6e9ee;font-size:14px;background:#fff;
+  }
+  textarea{min-height:70px;resize:vertical}
+
+  .full { grid-column: 1 / -1; }
+  .actions{display:flex;gap:10px;justify-content:flex-end;grid-column: 1 / -1;margin-top:6px;}
+  button{padding:10px 14px;border-radius:8px;border:none;cursor:pointer;font-weight:600;font-size:14px;}
+  .btn-save{background:var(--accent);color:white;}
+  .btn-clear{background:#eef2f6;color:#0f172a;}
+
+  .table-wrap{overflow:auto;margin-top:12px}
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  th, td{padding:10px 8px;border-bottom:1px solid #edf2f7;text-align:left;}
+  th{background:#f8fafc;color:#0f172a;font-weight:600;font-size:13px;}
+  td.small{width:90px;white-space:nowrap;}
+
+  @media(max-width:820px){
+    form.grid{grid-template-columns: 1fr;}
+    .actions{justify-content:stretch;flex-direction:column-reverse;}
+  }
+  .note{color:var(--muted);font-size:13px;margin-top:8px;}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <button class="logout-btn" onclick="logout()">Logout</button>
+
+    <div class="card">
+      <h1>Library Membership — New Enrollment / Borrow Entry</h1>
+      <p class="lead">Fill member details and borrowed book information. “Days on Book”, “Date Overdue”, and “Late Fine” are auto-calculated.</p>
+
+      <form id="memberForm" class="grid" autocomplete="off">
+        <!-- Left column -->
+        <div>
+          <label>Member Type</label>
+          <select id="memberType" required>
+            <option value="">-- Select Type --</option>
+            <option>Student</option>
+            <option>Faculty</option>
+            <option>External</option>
+            <option>Staff</option>
+          </select>
+
+          <label>ID No</label>
+          <input id="memberId" type="text" placeholder="e.g. MBR-0001" required />
+
+          <label>First Name</label>
+          <input id="firstName" type="text" placeholder="First name" required />
+
+          <label>Last Name</label>
+          <input id="lastName" type="text" placeholder="Last name" required />
+
+          <label>Address</label>
+          <textarea id="address" placeholder="Street, Area, City..." required></textarea>
+        </div>
+
+        <!-- Right column -->
+        <div>
+          <label>Post Code</label>
+          <input id="postCode" type="text" placeholder="560001" />
+
+          <label>Mobile</label>
+          <input id="mobile" type="tel" placeholder="+91 98765 43210" required />
+
+          <label>Book ID</label>
+          <input id="bookId" type="text" placeholder="BK-1023" required />
+
+          <label>Book Title</label>
+          <input id="title" type="text" placeholder="Book title" required />
+
+          <label>Author</label>
+          <input id="author" type="text" placeholder="Author full name" required />
+        </div>
+
+        <!-- Dates -->
+        <div class="full" style="display:grid;grid-template-columns: repeat(4, 1fr);gap:12px;">
+          <div>
+            <label>Date Borrowed</label>
+            <input id="dateBorrowed" type="date" required />
+          </div>
+          <div>
+            <label>Date Due</label>
+            <input id="dateDue" type="date" required />
+          </div>
+          <div>
+            <label>Date Overdue</label>
+            <input id="dateOverdue" type="text" readonly placeholder="Auto" />
+          </div>
+          <div>
+            <label>Days on Book</label>
+            <input id="daysOnBook" type="text" readonly placeholder="Auto" />
+          </div>
+        </div>
+
+        <!-- Fine and Price -->
+        <div class="full" style="display:grid;grid-template-columns: repeat(2, 1fr);gap:12px;">
+          <div>
+            <label>Late Return Fine (₹)</label>
+            <input id="lateFine" type="text" readonly placeholder="Auto-calculated" />
+          </div>
+          <div>
+            <label>Actual Price (₹)</label>
+            <input id="actualPrice" type="text" placeholder="Enter Book Price" />
+          </div>
+        </div>
+
+        <div class="actions full">
+          <button type="button" class="btn-clear" id="clearBtn">Clear</button>
+          <button type="submit" class="btn-save">Save Entry</button>
+        </div>
+        <div class="full note">Tip: Overdue fine = ₹10 per day after due date.</div>
+      </form>
+    </div>
+
+    <div class="card">
+      <h1>Saved Members / Borrowed Books</h1>
+      <div class="table-wrap">
+        <table id="recordsTable">
+          <thead>
+            <tr>
+              <th>Member Type</th>
+              <th>ID</th>
+              <th>First</th>
+              <th>Last</th>
+              <th>Book ID</th>
+              <th>Title</th>
+              <th>Author</th>
+              <th>Borrowed</th>
+              <th>Due</th>
+              <th>Overdue</th>
+              <th>Days</th>
+              <th>Fine</th>
+              <th>Price</th>
+            </tr>
+          </thead>
+          <tbody id="recordsBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+<script>
+function computeDays(fromDateStr, toDateStr){
+  if(!fromDateStr || !toDateStr) return '';
+  const from = new Date(fromDateStr);
+  const to = new Date(toDateStr);
+  const diff = Math.round((to - from) / (1000*60*60*24));
+  return diff >= 0 ? diff : '';
+}
+
+const form = document.getElementById('memberForm');
+const dateBorrowed = form.querySelector('#dateBorrowed');
+const dateDue = form.querySelector('#dateDue');
+const daysOnBook = form.querySelector('#daysOnBook');
+const dateOverdue = form.querySelector('#dateOverdue');
+const lateFine = form.querySelector('#lateFine');
+const clearBtn = document.getElementById('clearBtn');
+const recordsBody = document.getElementById('recordsBody');
+
+function updateAutoFields(){
+  const days = computeDays(dateBorrowed.value, dateDue.value);
+  daysOnBook.value = days;
+
+  const today = new Date();
+  const due = new Date(dateDue.value);
+  if(today > due){
+    const overdueDays = computeDays(dateDue.value, today.toISOString().split('T')[0]);
+    dateOverdue.value = today.toISOString().split('T')[0];
+    lateFine.value = overdueDays * 10;
+  } else {
+    dateOverdue.value = '';
+    lateFine.value = 0;
+  }
+}
+
+dateBorrowed.addEventListener('change', updateAutoFields);
+dateDue.addEventListener('change', updateAutoFields);
+
+form.addEventListener('submit', e=>{
+  e.preventDefault();
+  updateAutoFields();
+
+  const d = {
+    memberType: form.memberType.value,
+    memberId: form.memberId.value,
+    firstName: form.firstName.value,
+    lastName: form.lastName.value,
+    bookId: form.bookId.value,
+    title: form.title.value,
+    author: form.author.value,
+    dateBorrowed: form.dateBorrowed.value,
+    dateDue: form.dateDue.value,
+    dateOverdue: form.dateOverdue.value,
+    daysOnBook: form.daysOnBook.value,
+    lateFine: form.lateFine.value,
+    actualPrice: form.actualPrice.value
+  };
+  addRowToTable(d);
+  form.reset();
+});
+
+function addRowToTable(d){
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td>${d.memberType}</td>
+    <td>${d.memberId}</td>
+    <td>${d.firstName}</td>
+    <td>${d.lastName}</td>
+    <td>${d.bookId}</td>
+    <td>${d.title}</td>
+    <td>${d.author}</td>
+    <td>${d.dateBorrowed}</td>
+    <td>${d.dateDue}</td>
+    <td>${d.dateOverdue || '-'}</td>
+    <td>${d.daysOnBook}</td>
+    <td>₹${d.lateFine}</td>
+    <td>₹${d.actualPrice}</td>
+  `;
+  recordsBody.appendChild(tr);
+}
+
+clearBtn.addEventListener('click', ()=>form.reset());
+
+(function init(){
+  const today = new Date().toISOString().split('T')[0];
+  dateBorrowed.value = today;
+  const due = new Date(); due.setDate(due.getDate()+14);
+  dateDue.value = due.toISOString().split('T')[0];
+  updateAutoFields();
+})();
+
+function logout(){
+  if(confirm("Are you sure you want to logout?")){
+    alert("You have been logged out successfully!");
+    window.location.href = "login.html";
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Overdue Books</title>
+<style>
+  body { font-family: Arial, sans-serif; background:#f4f6f8; margin:0; padding:0; text-align:center; }
+  header { background:#007bff; color:white; padding:20px 0; font-size:24px; }
+  nav { background:#e9ecef; padding:15px; }
+  nav a { margin:10px; text-decoration:none; color:#007bff; font-weight:bold; }
+  nav a:hover { text-decoration:underline; }
+  .content { margin:30px auto; padding:0 20px; max-width:900px; text-align:left; }
+  table { width:100%; border-collapse:collapse; margin-top:10px; }
+  th, td { border:1px solid #dee2e6; padding:8px; text-align:left; }
+  th { background:#007bff; color:white; }
+  tr.overdue { background:#ffdddd; }
+  button { padding:4px 8px; border:none; border-radius:4px; cursor:pointer; margin:2px;}
+  .add-btn { background:#28a745; color:white; }
+  .delete-btn { background:#dc2626; color:white; }
+  .input-field { padding:6px; margin-right:4px; width:120px; }
+</style>
+</head>
+<body>
+
+<header>Overdue Books</header>
+<nav>
+  <a href="admin dashboard.html">Admin Dashboard</a>
+  <a href="#" onclick="logout()">Logout</a>
+</nav>
+
+<div class="content">
+  <h2>Borrowed Books</h2>
+
+  <!-- Add Book Form -->
+  <div>
+    <input class="input-field" id="bookId" placeholder="Book ID">
+    <input class="input-field" id="title" placeholder="Title">
+    <input class="input-field" id="author" placeholder="Author">
+    <input class="input-field" id="member" placeholder="Member Name">
+    <input class="input-field" id="dateDue" type="date" placeholder="Due Date">
+    <button class="add-btn" onclick="addBook()">Add</button>
+  </div>
+
+  <table id="overdueTable">
+    <thead>
+      <tr>
+        <th>Book ID</th>
+        <th>Title</th>
+        <th>Author</th>
+        <th>Member Name</th>
+        <th>Due Date</th>
+        <th>Days Overdue</th>
+        <th>Status</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<script>
+let role = localStorage.getItem("role");
+if(role !== "admin") { alert("Access Denied!"); window.location.href="login.html"; }
+
+function logout() { alert("Thank you!"); localStorage.removeItem("role"); window.location.href="login.html"; }
+
+// Load borrowed books from localStorage
+let borrowedBooks = JSON.parse(localStorage.getItem("borrowedBooks")) || [];
+
+// Save borrowed books
+function saveBooks(){ localStorage.setItem("borrowedBooks", JSON.stringify(borrowedBooks)); }
+
+// Compute overdue days
+function computeOverdue(dueDate){
+  const today = new Date();
+  const due = new Date(dueDate);
+  const diff = Math.floor((today - due)/(1000*60*60*24));
+  return diff > 0 ? diff : 0;
+}
+
+// Render table
+function renderBooks(){
+  const tbody = document.querySelector("#overdueTable tbody");
+  tbody.innerHTML = "";
+  borrowedBooks.forEach((book,i)=>{
+    const overdueDays = computeOverdue(book.dateDue);
+    const status = overdueDays>0 ? "Overdue" : "On Time";
+    const tr = document.createElement("tr");
+    if(overdueDays>0) tr.classList.add("overdue");
+    tr.innerHTML = `
+      <td>${book.id}</td>
+      <td>${book.title}</td>
+      <td>${book.author}</td>
+      <td>${book.memberName}</td>
+      <td>${book.dateDue}</td>
+      <td>${overdueDays}</td>
+      <td>${status}</td>
+      <td>
+        <button class="delete-btn" onclick="deleteBook(${i})">Delete</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// Add new book
+function addBook(){
+  const id = document.getElementById("bookId").value.trim();
+  const title = document.getElementById("title").value.trim();
+  const author = document.getElementById("author").value.trim();
+  const member = document.getElementById("member").value.trim();
+  const dateDue = document.getElementById("dateDue").value;
+  if(!id || !title || !author || !member || !dateDue){ alert("Fill all fields!"); return; }
+
+  borrowedBooks.push({id, title, author, memberName: member, dateDue});
+  saveBooks();
+  renderBooks();
+  // Clear form
+  document.getElementById("bookId").value="";
+  document.getElementById("title").value="";
+  document.getElementById("author").value="";
+  document.getElementById("member").value="";
+  document.getElementById("dateDue").value="";
+}
+
+// Delete book
+function deleteBook(index){
+  if(confirm("Delete this record?")){
+    borrowedBooks.splice(index,1);
+    saveBooks();
+    renderBooks();
+  }
+}
+
+// Initial render
+renderBooks();
+</script>
+
+</body>
+</html>

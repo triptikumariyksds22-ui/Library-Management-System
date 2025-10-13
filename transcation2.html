@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Student Transactions</title>
+<style>
+body { font-family: Arial, sans-serif; background:#f4f6f8; margin:0; padding:0; text-align:center;}
+header { background:#007bff; color:white; padding:20px 0; font-size:24px;}
+nav { background:#e9ecef; padding:15px; }
+nav a { margin:10px; text-decoration:none; color:#007bff; font-weight:bold;}
+nav a:hover { text-decoration:underline;}
+.content { margin:30px auto; max-width:1000px; text-align:left; }
+table { width:100%; border-collapse:collapse; margin-top:10px; }
+th, td { border:1px solid #dee2e6; padding:8px; text-align:center; }
+th { background:#007bff; color:white; }
+.checkbox { width:20px; height:20px; }
+.radio { width:16px; height:16px; }
+</style>
+</head>
+<body>
+
+<header>My Library Transactions</header>
+<nav>
+  <a href="student_dashboard.html">Dashboard</a>
+  <a href="booklist.html">Book List</a>
+  <a href="#" onclick="logout()">Logout</a>
+</nav>
+
+<div class="content">
+  <h2>My Transactions</h2>
+
+  <table id="transTable">
+    <thead>
+      <tr>
+        <th>Book ID</th>
+        <th>Title</th>
+        <th>Available</th>
+        <th>Issued</th>
+        <th>Booked</th>
+        <th>Returned</th>
+        <th>Late Fine (₹)</th>
+        <th>Damage?</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<script>
+// Access control
+let role = localStorage.getItem("role");
+if(role!=="student"){ alert("Access Denied! Only students can view this page."); window.location.href="login.html"; }
+
+// Mock student transaction data
+let transactions = JSON.parse(localStorage.getItem("transactions")) || [
+  { bookId:"BK101", title:"C Programming", available:true, status:"issued", lateFine:0, damage:false },
+  { bookId:"BK102", title:"Python Basics", available:false, status:"booked", lateFine:20, damage:true }
+];
+
+function logout(){ alert("Thank you!"); localStorage.removeItem("role"); window.location.href="login.html"; }
+
+function renderTable(){
+  const tbody = document.querySelector("#transTable tbody");
+  tbody.innerHTML="";
+  transactions.forEach((t,i)=>{
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${t.bookId}</td>
+      <td>${t.title}</td>
+      <td><input type="checkbox" class="checkbox" ${t.available ? "checked" : ""} disabled></td>
+      <td><input type="radio" class="radio" ${t.status==="issued"?"checked":""} disabled></td>
+      <td><input type="radio" class="radio" ${t.status==="booked"?"checked":""} disabled></td>
+      <td><input type="radio" class="radio" ${t.status==="returned"?"checked":""} disabled></td>
+      <td><input type="number" value="${t.lateFine}" readonly></td>
+      <td><input type="checkbox" class="checkbox" ${t.damage?"checked":""} disabled></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// Initial render
+renderTable();
+</script>
+
+</body>
+</html>

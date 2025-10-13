@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Pending Book Requests</title>
+<style>
+  body { font-family: Arial, sans-serif; background:#f4f6f8; margin:0; padding:0; text-align:center; }
+  header { background:#007bff; color:white; padding:20px 0; font-size:24px; }
+  nav { background:#e9ecef; padding:15px; }
+  nav a { margin:10px; text-decoration:none; color:#007bff; font-weight:bold; }
+  nav a:hover { text-decoration:underline; }
+  .content { margin:30px auto; padding:0 20px; max-width:900px; text-align:left; }
+  table { width:100%; border-collapse:collapse; margin-top:10px; }
+  th, td { border:1px solid #dee2e6; padding:8px; text-align:left; }
+  th { background:#007bff; color:white; }
+  button { padding:4px 8px; border:none; border-radius:4px; cursor:pointer; margin:2px;}
+  .approve-btn { background:#28a745; color:white; }
+  .reject-btn { background:#dc2626; color:white; }
+  .input-field { padding:6px; margin-right:4px; width:150px; }
+</style>
+</head>
+<body>
+
+<header>Pending Book Requests</header>
+<nav>
+  <a href="admin dashboard.html">Admin Dashboard</a>
+  <a href="#" onclick="logout()">Logout</a>
+</nav>
+
+<div class="content">
+  <h2>Requests</h2>
+
+  <!-- Add Request Form -->
+  <div>
+    <input class="input-field" id="bookId" placeholder="Book ID">
+    <input class="input-field" id="title" placeholder="Book Title">
+    <input class="input-field" id="member" placeholder="Member Name">
+    <button class="approve-btn" onclick="addRequest()">Add Request</button>
+  </div>
+
+  <table id="requestsTable">
+    <thead>
+      <tr>
+        <th>Book ID</th>
+        <th>Title</th>
+        <th>Member Name</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<script>
+let role = localStorage.getItem("role");
+if(role !== "admin"){ alert("Access Denied!"); window.location.href="login.html"; }
+
+function logout(){ alert("Thank you!"); localStorage.removeItem("role"); window.location.href="login.html"; }
+
+// Load pending requests from localStorage
+let pendingRequests = JSON.parse(localStorage.getItem("pendingRequests")) || [];
+
+// Save requests
+function saveRequests(){ localStorage.setItem("pendingRequests", JSON.stringify(pendingRequests)); }
+
+// Render requests
+function renderRequests(){
+  const tbody = document.querySelector("#requestsTable tbody");
+  tbody.innerHTML = "";
+  pendingRequests.forEach((req,i)=>{
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${req.bookId}</td>
+      <td>${req.title}</td>
+      <td>${req.member}</td>
+      <td>
+        <button class="approve-btn" onclick="approveRequest(${i})">Approve</button>
+        <button class="reject-btn" onclick="rejectRequest(${i})">Reject</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// Add new request
+function addRequest(){
+  const bookId = document.getElementById("bookId").value.trim();
+  const title = document.getElementById("title").value.trim();
+  const member = document.getElementById("member").value.trim();
+  if(!bookId || !title || !member){ alert("Fill all fields!"); return; }
+
+  pendingRequests.push({bookId, title, member});
+  saveRequests();
+  renderRequests();
+
+  document.getElementById("bookId").value="";
+  document.getElementById("title").value="";
+  document.getElementById("member").value="";
+}
+
+// Approve request
+function approveRequest(index){
+  const req = pendingRequests[index];
+  // Move to borrowedBooks (use same localStorage as overdue page)
+  let borrowedBooks = JSON.parse(localStorage.getItem("borrowedBooks")) || [];
+  let today = new Date();
+  let dueDate = new Date();
+  dueDate.setDate(today.getDate()+14); // 2 weeks due
+  borrowedBooks.push({
+    id: req.bookId,
+    title: req.title,
+    author: "-", // optional, can add later
+    memberName: req.member,
+    dateDue: dueDate.toISOString().split('T')[0]
+  });
+  localStorage.setItem("borrowedBooks", JSON.stringify(borrowedBooks));
+
+  // Remove from pending
+  pendingRequests.splice(index,1);
+  saveRequests();
+  renderRequests();
+  alert("Request approved and added to borrowed books.");
+}
+
+// Reject request
+function rejectRequest(index){
+  if(confirm("Reject this request?")){
+    pendingRequests.splice(index,1);
+    saveRequests();
+    renderRequests();
+  }
+}
+
+// Initial render
+renderRequests();
+</script>
+
+</body>
+</html>

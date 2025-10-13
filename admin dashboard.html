@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Dashboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f6f8;
+      margin: 0;
+      text-align: center;
+    }
+    header {
+      background: #007bff;
+      color: white;
+      padding: 20px 0;
+      font-size: 24px;
+    }
+    nav {
+      background: #e9ecef;
+      padding: 15px;
+    }
+    nav a {
+      margin: 10px;
+      text-decoration: none;
+      color: #007bff;
+      font-weight: bold;
+    }
+    nav a:hover {
+      text-decoration: underline;
+    }
+    .content {
+      margin-top: 40px;
+    }
+    .maintenance {
+      background: #fff;
+      border: 2px solid #007bff;
+      display: inline-block;
+      padding: 20px;
+      margin-top: 20px;
+      border-radius: 10px;
+      text-align: left;
+      width: 80%;
+      max-width: 600px;
+    }
+    .maintenance h3 {
+      color: #007bff;
+      margin-top: 0;
+    }
+    .maintenance button {
+      display: block;
+      width: 100%;
+      padding: 10px 15px;
+      margin: 10px 0;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      background: #28a745;
+      color: white;
+      transition: 0.2s;
+    }
+    .maintenance button:hover {
+      background: #218838;
+    }
+  </style>
+</head>
+<body>
+  <header>Admin Dashboard</header>
+
+  <nav>
+    <a href="login.html">Home</a>
+    <a href="book_categories.html">Books</a>
+    <a href="members.html">Members</a>
+    <a href="maintenance.html">Maintenance</a>
+    <a href="#" onclick="logout()">Logout</a>
+  </nav>
+
+  <div class="content">
+    <h2>Welcome, Admin!</h2>
+    <p>You can manage library data and maintenance here.</p>
+
+    <div class="maintenance">
+      <h3>Library Master Actions</h3>
+      <button onclick="openMasterList()">📚 Master List of Books</button>
+      <button onclick="openOverdueBooks()">⏰ Overdue Books</button>
+      <button onclick="openPendingRequests()">📝 Pending Issue Requests</button>
+      
+    </div>
+  </div>
+
+  <script>
+    // Role check
+    let role = localStorage.getItem("role");
+    if (role !== "admin") {
+      alert("Access Denied! Only admin can open this page.");
+      window.location.href = "login.html";
+    }
+
+    // Logout
+    function logout() {
+      alert("Thank you for visiting!");
+      localStorage.removeItem("role");
+      window.location.href = "login.html";
+    }
+
+    // Button actions
+    function openMasterList() {
+      window.location.href = "book_maintenance.html"; // replace with your actual master list page
+    }
+
+    function openOverdueBooks() {
+      window.location.href = "overdue_books.html"; // replace with actual overdue template
+    }
+
+    function openPendingRequests() {
+      window.location.href = "pending_requests.html"; // replace with actual pending requests template
+    }
+
+    
+  </script>
+</body>
+</html>

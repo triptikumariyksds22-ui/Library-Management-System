@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Library — Book Category Management</title>
+<style>
+  :root{
+    --bg: #f6f8fb;
+    --card: #ffffff;
+    --accent: #2563eb;
+    --danger: #ef4444;
+    --muted: #6b7280;
+    --radius: 10px;
+  }
+  body{
+    margin:0;
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+    background:var(--bg);
+    padding:28px;
+    display:flex;
+    justify-content:center;
+  }
+  .container{width:100%;max-width:1000px}
+  .card{
+    background:var(--card);
+    border-radius:var(--radius);
+    box-shadow:0 6px 20px rgba(2,6,23,0.06);
+    padding:18px;
+  }
+  h1{font-size:20px;margin:0 0 8px;color:#0f172a;}
+  p.lead{margin:0 0 14px;color:var(--muted);font-size:14px;}
+  .form-row{display:flex;gap:12px;align-items:center;margin-bottom:12px;}
+  .form-row input{flex:1;padding:10px 12px;border-radius:8px;border:1px solid #e6e9ee;font-size:14px;background:#fff;}
+  .btn{background:var(--accent);color:white;border:none;padding:10px 14px;border-radius:8px;cursor:pointer;font-weight:600;}
+  .btn.secondary{background:#eef2f6;color:#0f172a;}
+  .btn.danger{background:var(--danger);}
+  table{width:100%;border-collapse:collapse;font-size:14px;margin-top:15px;}
+  th, td{padding:10px 8px;border-bottom:1px solid #f1f5f9;text-align:left;}
+  th{background:#fbfdff;color:#0f172a;font-weight:700;font-size:13px;}
+  td.actions{white-space:nowrap}
+  .badge{display:inline-block;padding:6px 8px;border-radius:8px;background:#eef2ff;color:#1e40af;font-weight:600;font-size:12px;}
+  .books-list{margin-top:5px;font-size:13px;}
+  .book-item{padding:2px 4px;border-bottom:1px solid #f1f5f9;}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="card">
+    <h1>Book Category Management</h1>
+    <p class="lead">Add categories and books. Book count is updated automatically.</p>
+
+    <!-- Admin Dashboard Button -->
+    <button class="btn" onclick="goToAdminDashboard()" style="margin-bottom:10px;">Go to Admin Dashboard</button>
+
+    <!-- Add Category -->
+    <div class="form-row">
+      <input type="text" id="catCode" placeholder="Category Code (e.g. CAT001)">
+      <input type="text" id="catName" placeholder="Category Name (e.g. Computer Science)">
+      <button class="btn" id="saveBtn">Add Category</button>
+      <button class="btn secondary" id="resetBtn">Clear</button>
+    </div>
+
+    <!-- Table -->
+    <table>
+      <thead>
+        <tr>
+          <th>Code</th>
+          <th>Name</th>
+          <th>Books Count</th>
+          <th>Books</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="catBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+let role = localStorage.getItem("role");
+if(role !== "admin"){
+  alert("Access Denied! Only admin can access this page.");
+  window.location.href = "login.html";
+}
+
+function goToAdminDashboard(){
+  window.location.href = "admin dashboard.html";
+}
+
+const LS_KEY = "library_categories_books";
+const catCodeEl = document.getElementById("catCode");
+const catNameEl = document.getElementById("catName");
+const saveBtn = document.getElementById("saveBtn");
+const resetBtn = document.getElementById("resetBtn");
+const catBody = document.getElementById("catBody");
+
+let categories = [];
+let editIndex = -1;
+
+// Load from localStorage
+function loadCategories(){
+  const raw = localStorage.getItem(LS_KEY);
+  categories = raw ? JSON.parse(raw) : [];
+  renderTable();
+}
+
+function saveCategories(){
+  localStorage.setItem(LS_KEY, JSON.stringify(categories));
+}
+
+// Render table
+function renderTable(){
+  catBody.innerHTML = "";
+  categories.forEach((c, idx)=>{
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${c.code}</td>
+      <td>${c.name}</td>
+      <td><span class="badge">${c.books.length}</span></td>
+      <td>
+        <div class="books-list" id="books-${idx}">
+          ${c.books.map((b,i)=>`<div class="book-item">${b.name} by ${b.author} 
+            <button onclick="deleteBook(${idx},${i})" class="btn secondary">x</button></div>`).join("")}
+        </div>
+        <div class="form-row" style="margin-top:5px;">
+          <input type="text" id="bookName-${idx}" placeholder="Book Name">
+          <input type="text" id="bookAuthor-${idx}" placeholder="Author">
+          <button class="btn" onclick="addBook(${idx})">Add Book</button>
+        </div>
+      </td>
+      <td>
+        <button onclick="editCategory(${idx})">Edit</button>
+        <button onclick="deleteCategory(${idx})" class="btn secondary">Delete</button>
+      </td>
+    `;
+    catBody.appendChild(tr);
+  });
+}
+
+// Reset form
+function resetForm(){
+  catCodeEl.value = "";
+  catNameEl.value = "";
+  editIndex = -1;
+  saveBtn.textContent = "Add Category";
+}
+
+// Add/Edit category
+saveBtn.addEventListener("click", ()=>{
+  const code = catCodeEl.value.trim();
+  const name = catNameEl.value.trim();
+  if(!code || !name){
+    alert("Please enter both code and name");
+    return;
+  }
+
+  if(editIndex===-1){
+    if(categories.some(c=>c.code===code)){
+      alert("Category code already exists!");
+      return;
+    }
+    categories.push({code, name, books: []});
+  } else {
+    categories[editIndex].code = code;
+    categories[editIndex].name = name;
+  }
+
+  saveCategories();
+  renderTable();
+  resetForm();
+});
+
+resetBtn.addEventListener("click", resetForm);
+
+// Edit/Delete category
+function editCategory(idx){
+  const c = categories[idx];
+  catCodeEl.value = c.code;
+  catNameEl.value = c.name;
+  editIndex = idx;
+  saveBtn.textContent = "Save Changes";
+}
+
+function deleteCategory(idx){
+  if(confirm("Delete this category?")){
+    categories.splice(idx,1);
+    saveCategories();
+    renderTable();
+    resetForm();
+  }
+}
+
+// Add/Delete book
+function addBook(catIdx){
+  const nameEl = document.getElementById(`bookName-${catIdx}`);
+  const authorEl = document.getElementById(`bookAuthor-${catIdx}`);
+  const name = nameEl.value.trim();
+  const author = authorEl.value.trim();
+  if(!name || !author){ alert("Enter book name and author"); return; }
+  categories[catIdx].books.push({name, author});
+  saveCategories();
+  renderTable();
+}
+
+function deleteBook(catIdx, bookIdx){
+  categories[catIdx].books.splice(bookIdx,1);
+  saveCategories();
+  renderTable();
+}
+
+// Initialize
+loadCategories();
+</script>
+</body>
+</html>

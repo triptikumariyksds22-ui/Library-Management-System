@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Library Members Management</title>
+<style>
+body {font-family: Arial, sans-serif; background:#f4f6f8; margin:0; text-align:center;}
+header {background:#007bff;color:white;padding:20px 0;font-size:24px;}
+nav {background:#e9ecef;padding:15px;}
+nav a {margin:10px; text-decoration:none;color:#007bff;font-weight:bold;}
+nav a:hover {text-decoration:underline;}
+.content {margin-top:30px; padding:0 20px; text-align:left; max-width:1000px; margin:auto;}
+table {width:100%; border-collapse:collapse; margin-top:10px;}
+th, td {border:1px solid #dee2e6; padding:8px; text-align:left;}
+th {background:#007bff; color:white;}
+button {padding:4px 8px; border:none; border-radius:4px; cursor:pointer;}
+.add-btn {background:#28a745; color:white;}
+.delete-btn {background:#dc2626; color:white;}
+</style>
+</head>
+<body>
+
+<header>Library Members Management</header>
+<nav>
+  <a href="admin dashboard.html">Admin Dashboard</a>
+  <a href="#" onclick="logout()">Logout</a>
+</nav>
+
+<div class="content">
+<h2>Faculty Members</h2>
+<button class="add-btn" onclick="addMember('faculty')">Add Faculty</button>
+<table id="facultyTable">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Borrowed Book</th>
+      <th>Author</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<h2>Student Members</h2>
+<button class="add-btn" onclick="addMember('student')">Add Student</button>
+<table id="studentTable">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Program</th>
+      <th>Year</th>
+      <th>Borrowed Book</th>
+      <th>Author</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+</div>
+
+<script>
+// Admin-only
+let role = localStorage.getItem("role");
+if(role!=='admin'){ alert("Access Denied!"); window.location.href="login.html"; }
+
+// Load data
+let facultyMembers = JSON.parse(localStorage.getItem("facultyMembers")) || [];
+let studentMembers = JSON.parse(localStorage.getItem("studentMembers")) || [];
+
+// Save data
+function saveData(){
+  localStorage.setItem("facultyMembers", JSON.stringify(facultyMembers));
+  localStorage.setItem("studentMembers", JSON.stringify(studentMembers));
+}
+
+// Render tables
+function renderFaculty(){
+  let tbody = document.querySelector("#facultyTable tbody");
+  tbody.innerHTML = "";
+  facultyMembers.forEach((m,i)=>{
+    if(m.borrowedBooks.length===0) m.borrowedBooks=[{book:"-",author:"-"}];
+    m.borrowedBooks.forEach((b,j)=>{
+      let row = document.createElement("tr");
+      row.innerHTML = `<td>${m.name}</td>
+                       <td>${b.book}</td>
+                       <td>${b.author}</td>
+                       <td><button class="delete-btn" onclick="deleteFaculty(${i})">Delete</button></td>`;
+      tbody.appendChild(row);
+    });
+  });
+}
+
+function renderStudents(){
+  let tbody = document.querySelector("#studentTable tbody");
+  tbody.innerHTML = "";
+  studentMembers.forEach((m,i)=>{
+    if(m.borrowedBooks.length===0) m.borrowedBooks=[{book:"-",author:"-"}];
+    m.borrowedBooks.forEach((b,j)=>{
+      let row = document.createElement("tr");
+      row.innerHTML = `<td>${m.name}</td>
+                       <td>${m.program}</td>
+                       <td>${m.year}</td>
+                       <td>${b.book}</td>
+                       <td>${b.author}</td>
+                       <td><button class="delete-btn" onclick="deleteStudent(${i})">Delete</button></td>`;
+      tbody.appendChild(row);
+    });
+  });
+}
+
+// Add member
+function addMember(type){
+  let name = prompt(`Enter ${type==='faculty'?'Faculty':'Student'} Name:`);
+  if(!name) return;
+  let borrowedBooks = [];
+  while(confirm("Add borrowed book?")){
+    let book = prompt("Book Title:");
+    let author = prompt("Author Name:");
+    if(book && author) borrowedBooks.push({book,author});
+  }
+  if(borrowedBooks.length===0) borrowedBooks=[{book:"-",author:"-"}];
+  let member = {name, borrowedBooks};
+
+  if(type==='faculty'){
+    facultyMembers.push(member);
+    saveData();
+    renderFaculty();
+  } else {
+    let program = prompt("Enter Program (B.Tech/MBA/Dental):");
+    let year = prompt("Enter Year:");
+    if(!program || !year) return;
+    member.program = program;
+    member.year = year;
+    studentMembers.push(member);
+    saveData();
+    renderStudents();
+  }
+}
+
+// Delete
+function deleteFaculty(i){ facultyMembers.splice(i,1); saveData(); renderFaculty(); }
+function deleteStudent(i){ studentMembers.splice(i,1); saveData(); renderStudents(); }
+
+// Initial render
+renderFaculty();
+renderStudents();
+
+// Logout
+function logout(){ alert("Thank you!"); localStorage.removeItem("role"); window.location.href="login.html"; }
+</script>
+</body>
+</html>

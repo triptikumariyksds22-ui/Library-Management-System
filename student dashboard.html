@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Student Dashboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #eaf8f1;
+      text-align: center;
+      margin: 0;
+    }
+    header {
+      background: #28a745;
+      color: white;
+      padding: 20px 0;
+      font-size: 24px;
+    }
+    nav {
+      background: #dff0e0;
+      padding: 15px;
+    }
+    nav a {
+      margin: 10px;
+      text-decoration: none;
+      color: #28a745;
+      font-weight: bold;
+    }
+    nav a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <header>Student Dashboard</header>
+
+  <nav>
+    <a href="login.html">Home</a>
+    <a href="booklist.html">My Books</a>
+    <a href="transcation2.html">Profile</a>
+    <a href="#" onclick="logout()">Logout</a>
+  </nav>
+
+  <h2>Welcome, Student!</h2>
+  <p>You can view your borrowed books and due dates here.</p>
+
+  <script>
+    let role = localStorage.getItem("role");
+    if (role !== "student") {
+      alert("Access Denied! Only students can open this page.");
+      window.location.href = "login.html";
+    }
+
+    function logout() {
+      alert("Thank you for visiting!");
+      localStorage.removeItem("role");
+      window.location.href = "login.html";
+    }
+  </script>
+</body>
+</html>
