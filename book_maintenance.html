@@ -83,7 +83,7 @@ function renderBooks(){
   });
 }
 
-// Add book
+
 function addBook(){
   const id = prompt("Enter Book ID:");
   const title = prompt("Enter Book Title:");
@@ -95,7 +95,7 @@ function addBook(){
   renderBooks();
 }
 
-// Update book quantity
+
 function updateBook(i){
   let qty = prompt("Update Quantity:", books[i].quantity);
   if(qty!==null){
@@ -115,13 +115,13 @@ function deleteBook(i){
   }
 }
 
-// Toggle availability
+
 function toggleAvailable(i, el){
   books[i].available = el.checked;
   saveBooks();
 }
 
-// Initial render
+
 renderBooks();
 </script>
 

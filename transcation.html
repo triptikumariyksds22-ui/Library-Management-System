@@ -54,11 +54,11 @@ input[type="text"], input[type="number"] { width:90px; padding:4px; }
 </div>
 
 <script>
-// Access control
+
 let role = localStorage.getItem("role");
 if(!role){ alert("Access Denied! Login first."); window.location.href="login.html"; }
 
-// Mock transaction data
+
 let transactions = JSON.parse(localStorage.getItem("transactions")) || [
   { member:"Alice", bookId:"BK101", title:"C Programming", available:true, status:"issued", lateFine:0, damage:false },
   { member:"Bob", bookId:"BK102", title:"Python Basics", available:false, status:"booked", lateFine:20, damage:true }

@@ -64,13 +64,13 @@ if(role !== "admin") { alert("Access Denied!"); window.location.href="login.html
 
 function logout() { alert("Thank you!"); localStorage.removeItem("role"); window.location.href="login.html"; }
 
-// Load borrowed books from localStorage
+
 let borrowedBooks = JSON.parse(localStorage.getItem("borrowedBooks")) || [];
 
-// Save borrowed books
+
 function saveBooks(){ localStorage.setItem("borrowedBooks", JSON.stringify(borrowedBooks)); }
 
-// Compute overdue days
+
 function computeOverdue(dueDate){
   const today = new Date();
   const due = new Date(dueDate);
@@ -78,7 +78,6 @@ function computeOverdue(dueDate){
   return diff > 0 ? diff : 0;
 }
 
-// Render table
 function renderBooks(){
   const tbody = document.querySelector("#overdueTable tbody");
   tbody.innerHTML = "";
@@ -103,7 +102,7 @@ function renderBooks(){
   });
 }
 
-// Add new book
+
 function addBook(){
   const id = document.getElementById("bookId").value.trim();
   const title = document.getElementById("title").value.trim();
@@ -123,7 +122,7 @@ function addBook(){
   document.getElementById("dateDue").value="";
 }
 
-// Delete book
+
 function deleteBook(index){
   if(confirm("Delete this record?")){
     borrowedBooks.splice(index,1);
@@ -132,7 +131,6 @@ function deleteBook(index){
   }
 }
 
-// Initial render
 renderBooks();
 </script>
 

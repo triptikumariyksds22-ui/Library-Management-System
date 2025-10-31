@@ -21,7 +21,7 @@ th { background:#007bff; color:white; }
 
 <header>My Library Transactions</header>
 <nav>
-  <a href="student_dashboard.html">Dashboard</a>
+  <a href="student dashboard.html">Dashboard</a>
   <a href="booklist.html">Book List</a>
   <a href="#" onclick="logout()">Logout</a>
 </nav>
@@ -47,11 +47,11 @@ th { background:#007bff; color:white; }
 </div>
 
 <script>
-// Access control
+
 let role = localStorage.getItem("role");
 if(role!=="student"){ alert("Access Denied! Only students can view this page."); window.location.href="login.html"; }
 
-// Mock student transaction data
+
 let transactions = JSON.parse(localStorage.getItem("transactions")) || [
   { bookId:"BK101", title:"C Programming", available:true, status:"issued", lateFine:0, damage:false },
   { bookId:"BK102", title:"Python Basics", available:false, status:"booked", lateFine:20, damage:true }
@@ -78,7 +78,6 @@ function renderTable(){
   });
 }
 
-// Initial render
 renderTable();
 </script>
 

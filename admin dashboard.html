@@ -90,31 +90,31 @@
   </div>
 
   <script>
-    // Role check
+    
     let role = localStorage.getItem("role");
     if (role !== "admin") {
       alert("Access Denied! Only admin can open this page.");
       window.location.href = "login.html";
     }
 
-    // Logout
+   
     function logout() {
       alert("Thank you for visiting!");
       localStorage.removeItem("role");
       window.location.href = "login.html";
     }
 
-    // Button actions
+  
     function openMasterList() {
-      window.location.href = "book_maintenance.html"; // replace with your actual master list page
+      window.location.href = "book_maintenance.html"; 
     }
 
     function openOverdueBooks() {
-      window.location.href = "overdue_books.html"; // replace with actual overdue template
+      window.location.href = "overdue_books.html"; 
     }
 
     function openPendingRequests() {
-      window.location.href = "pending_requests.html"; // replace with actual pending requests template
+      window.location.href = "pending_requests.html"; 
     }
 
     

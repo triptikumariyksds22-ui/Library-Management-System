@@ -2,80 +2,136 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Student Book List</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Library — Student Book List</title>
 <style>
-body { font-family: Arial, sans-serif; background:#f4f6f8; margin:0; text-align:center; }
-header { background:#007bff; color:white; padding:20px 0; font-size:24px; }
-nav { background:#e9ecef; padding:15px; }
-nav a { margin:10px; text-decoration:none; color:#007bff; font-weight:bold; }
-nav a:hover { text-decoration:underline; }
-.content { margin:30px auto; max-width:900px; text-align:left; }
-table { width:100%; border-collapse:collapse; margin-top:10px; }
-th, td { border:1px solid #dee2e6; padding:8px; text-align:left; }
-th { background:#007bff; color:white; }
-.badge { background:#28a745; color:white; padding:3px 7px; border-radius:5px; }
+  :root {
+    --bg: #f6f8fb;
+    --card: #ffffff;
+    --accent: #2563eb;
+    --muted: #6b7280;
+    --radius: 10px;
+  }
+  body {
+    margin: 0;
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+    background: var(--bg);
+    padding: 28px;
+    display: flex;
+    justify-content: center;
+  }
+  .container {
+    width: 100%;
+    max-width: 1000px;
+  }
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: 0 6px 20px rgba(2, 6, 23, 0.06);
+    padding: 18px;
+  }
+  h1 { font-size: 20px; margin: 0 0 8px; color: #0f172a; }
+  p.lead { margin: 0 0 14px; color: var(--muted); font-size: 14px; }
+  .btn {
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 10px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    margin-top: 15px;
+  }
+  th, td {
+    padding: 10px 8px;
+    border-bottom: 1px solid #f1f5f9;
+    text-align: left;
+  }
+  th {
+    background: #fbfdff;
+    color: #0f172a;
+    font-weight: 700;
+    font-size: 13px;
+  }
+  .badge {
+    display: inline-block;
+    padding: 6px 8px;
+    border-radius: 8px;
+    background: #eef2ff;
+    color: #1e40af;
+    font-weight: 600;
+    font-size: 12px;
+  }
+  .book-item {
+    padding: 3px 0;
+    border-bottom: 1px solid #f1f5f9;
+  }
 </style>
 </head>
 <body>
+<div class="container">
+  <div class="card">
+    <h1>Available Books</h1>
+    <p class="lead">All categories and books added by the admin are listed here.</p>
 
-<header>Library Book List</header>
-<nav>
-  <a href="student dashboard.html">Dashboard</a>
- 
-  <a href="#" onclick="logout()">Logout</a>
-</nav>
+    <button class="btn" onclick="goToStudentDashboard()" style="margin-bottom:10px;">Go to Student Dashboard</button>
 
-<div class="content">
-<h2>Available Books</h2>
-<table id="bookTable">
-  <thead>
-    <tr>
-      <th>Book ID</th>
-      <th>Title</th>
-      <th>Author</th>
-      <th>Available Quantity</th>
-    </tr>
-  </thead>
-  <tbody></tbody>
-</table>
+    <table>
+      <thead>
+        <tr>
+          <th>Category Code</th>
+          <th>Category Name</th>
+          <th>Books Count</th>
+          <th>Books List</th>
+        </tr>
+      </thead>
+      <tbody id="bookBody"></tbody>
+    </table>
+  </div>
 </div>
 
 <script>
-// Sample data
-let books = [
-  { id: "BK101", title: "C Programming", author: "Dennis Ritchie", quantity: 5 },
-  { id: "BK102", title: "Python Basics", author: "Guido van Rossum", quantity: 3 },
-  { id: "BK103", title: "Data Structures", author: "Mark Allen Weiss", quantity: 4 },
-  { id: "BK104", title: "Machine Learning", author: "Tom Mitchell", quantity: 2 },
-  { id: "BK105", title: "Digital Electronics", author: "M. Morris Mano", quantity: 6 }
-];
+function goToStudentDashboard(){
+  window.location.href = "student dashboard.html";
+}
 
-// Render table
-function renderBooks(){
-  const tbody = document.querySelector("#bookTable tbody");
-  tbody.innerHTML = "";
-  books.forEach(b=>{
+const LS_KEY = "library_categories_books";
+const bookBody = document.getElementById("bookBody");
+
+function loadBooks(){
+  const raw = localStorage.getItem(LS_KEY);
+  const categories = raw ? JSON.parse(raw) : [];
+  renderTable(categories);
+}
+
+function renderTable(categories){
+  bookBody.innerHTML = "";
+  if(categories.length === 0){
+    bookBody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:gray;">No data available. Please contact admin.</td></tr>`;
+    return;
+  }
+
+  categories.forEach(cat => {
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td>${b.id}</td>
-      <td>${b.title}</td>
-      <td>${b.author}</td>
-      <td><span class="badge">${b.quantity}</span></td>
+      <td>${cat.code}</td>
+      <td>${cat.name}</td>
+      <td><span class="badge">${cat.books.length}</span></td>
+      <td>
+        ${cat.books.map(b => `<div class="book-item">${b.name} by ${b.author}</div>`).join("")}
+      </td>
     `;
-    tbody.appendChild(tr);
+    bookBody.appendChild(tr);
   });
 }
 
-// Logout
-function logout(){
-  alert("Thank you!");
-  localStorage.removeItem("role");
-  window.location.href="login.html";
-}
-
-// Initial render
-renderBooks();
+// Initialize
+loadBooks();
 </script>
-
 </body>
 </html>
